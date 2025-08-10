@@ -29,6 +29,7 @@ namespace Yarn.Markup
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
+    using YarnSpinner.YarnSpinner.Markup;
 
 #pragma warning disable CA1815
     /// <summary>
@@ -53,14 +54,21 @@ namespace Yarn.Markup
         public List<MarkupAttribute> Attributes { get; }
 
         /// <summary>
+        /// Shared for markups meta
+        /// </summary>
+        public SharedMarkupsMeta SharedMarkupsMeta { get; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="MarkupParseResult"/> struct.
         /// </summary>
         /// <param name="text">The plain text.</param>
         /// <param name="attributes">The list of attributes.</param>
-        public MarkupParseResult(string text, List<MarkupAttribute> attributes)
+        /// <param name="sharedMarkupsMeta"></param>
+        public MarkupParseResult(string text, List<MarkupAttribute> attributes, SharedMarkupsMeta sharedMarkupsMeta)
         {
             this.Text = text;
             this.Attributes = attributes;
+            this.SharedMarkupsMeta = sharedMarkupsMeta;
         }
 
         /// <summary>
@@ -221,7 +229,7 @@ namespace Yarn.Markup
                     }
                 }
 
-                return new MarkupParseResult(this.Text, newAttributes);
+                return new MarkupParseResult(this.Text, newAttributes, this.SharedMarkupsMeta);
             }
 
             var deletionStart = attributeToDelete.Position;
@@ -310,7 +318,8 @@ namespace Yarn.Markup
                 newAttributes.Add(editedAttribute);
             }
 
-            return new MarkupParseResult(editedSubstring, newAttributes);
+            // FIXME SharedMarkupsMeta devrait être modifié aussi
+            return new MarkupParseResult(editedSubstring, newAttributes, this.SharedMarkupsMeta);
         }
     }
 #pragma warning restore CA1815
@@ -379,6 +388,7 @@ namespace Yarn.Markup
         {
         }
 
+        // TODO voir si le shift n'impose pas de problèmes avec sharedMarkupsMeta
         /// <summary>
         /// Creates a new <see cref="MarkupAttribute"/> based on the current
         /// instance whose <see cref="Position"/> is shifted towards the end of

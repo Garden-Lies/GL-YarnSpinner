@@ -657,7 +657,7 @@ namespace YarnSpinner.Tests
             var builder = new System.Text.StringBuilder();
             List<MarkupAttribute> attributes = new List<MarkupAttribute>();
             List<LineParser.MarkupDiagnostic> diagnostics = new List<LineParser.MarkupDiagnostic>();
-            lineParser.WalkAndProcessTree(tree, builder, attributes, "en", diagnostics);
+            lineParser.WalkAndProcessTree(tree, builder, attributes, "en", diagnostics, new());
 
             diagnostics.Should().HaveCount(0);
 
@@ -684,7 +684,7 @@ namespace YarnSpinner.Tests
             var builder = new System.Text.StringBuilder();
             List<MarkupAttribute> attributes = new List<MarkupAttribute>();
             List<LineParser.MarkupDiagnostic> diagnostics = new List<LineParser.MarkupDiagnostic>();
-            lineParser.WalkAndProcessTree(tree, builder, attributes, "en", diagnostics);
+            lineParser.WalkAndProcessTree(tree, builder, attributes, "en", diagnostics, new());
 
             diagnostics.Should().HaveCount(0);
 
@@ -694,7 +694,7 @@ namespace YarnSpinner.Tests
             attributes.Should().HaveCount(attributeCount);
         }
 
-        List<LineParser.MarkupDiagnostic> IAttributeMarkerProcessor.ProcessReplacementMarker(MarkupAttribute marker, StringBuilder childBuilder, List<MarkupAttribute> childAttributes, string localeCode)
+        List<LineParser.MarkupDiagnostic> IAttributeMarkerProcessor.ProcessReplacementMarker(MarkupAttribute marker, StringBuilder childBuilder, List<MarkupAttribute> childAttributes, YarnSpinner.Markup.SharedMarkupsMeta sharedMarkupsMeta, string localeCode)
         {
             var diagnostics = new List<LineParser.MarkupDiagnostic>();
             switch (marker.Name)
@@ -747,7 +747,7 @@ namespace YarnSpinner.Tests
             var builder = new System.Text.StringBuilder();
             List<MarkupAttribute> attributes = new List<MarkupAttribute>();
             List<LineParser.MarkupDiagnostic> diagnostics = new List<LineParser.MarkupDiagnostic>();
-            lineParser.WalkAndProcessTree(tree, builder, attributes, "en", diagnostics);
+            lineParser.WalkAndProcessTree(tree, builder, attributes, "en", diagnostics, new());
 
             diagnostics.Should().HaveCount(0);
 
@@ -759,7 +759,7 @@ namespace YarnSpinner.Tests
             builder = new System.Text.StringBuilder();
             attributes = new List<MarkupAttribute>();
             diagnostics = new List<LineParser.MarkupDiagnostic>();
-            lineParser.WalkAndProcessTree(tree, builder, attributes, "fr", diagnostics);
+            lineParser.WalkAndProcessTree(tree, builder, attributes, "fr", diagnostics, new());
 
             diagnostics.Should().HaveCount(0);
 
@@ -784,7 +784,7 @@ namespace YarnSpinner.Tests
             var builder = new System.Text.StringBuilder();
             List<MarkupAttribute> attributes = new List<MarkupAttribute>();
             List<LineParser.MarkupDiagnostic> diagnostics = new List<LineParser.MarkupDiagnostic>();
-            lineParser.WalkAndProcessTree(tree, builder, attributes, "en", diagnostics);
+            lineParser.WalkAndProcessTree(tree, builder, attributes, "en", diagnostics, new());
 
             diagnostics.Should().HaveCount(0);
 
@@ -1304,7 +1304,7 @@ namespace YarnSpinner.Tests
             tag = markerName;
         }
 
-        public List<LineParser.MarkupDiagnostic> ProcessReplacementMarker(MarkupAttribute marker, StringBuilder childBuilder, List<MarkupAttribute> childAttributes, string localeCode)
+        public List<LineParser.MarkupDiagnostic> ProcessReplacementMarker(MarkupAttribute marker, StringBuilder childBuilder, List<MarkupAttribute> childAttributes, YarnSpinner.Markup.SharedMarkupsMeta sharedMarkupsMeta, string localeCode)
         {
             List<LineParser.MarkupDiagnostic> diagnostics = new List<LineParser.MarkupDiagnostic>();
             if (marker.Name != tag)

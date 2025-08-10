@@ -30,6 +30,7 @@ namespace Yarn.Markup
     using System.Collections.Generic;
     using System.IO;
     using System.Text;
+    using YarnSpinner.YarnSpinner.Markup;
 
     /*
         Apropos of nothing while we said for v3 we wanted markup diagnostics,
@@ -776,13 +777,13 @@ namespace Yarn.Markup
         // where the b tag is a rewriter and the emotion tag is not.
         // in that case because previously we only kept the last fully processed non-replacement sibling the emotion tag would eat the whitespace AFTER the b tag had replaced itself
         private MarkupTreeNode? sibling = null;
-        internal void WalkAndProcessTree(MarkupTreeNode root, System.Text.StringBuilder builder, List<MarkupAttribute> attributes, string localeCode, List<MarkupDiagnostic> diagnostics, int offset = 0)
+        internal void WalkAndProcessTree(MarkupTreeNode root, System.Text.StringBuilder builder, List<MarkupAttribute> attributes, string localeCode, List<MarkupDiagnostic> diagnostics, SharedMarkupsMeta sharedMarkupsMeta, int offset = 0)
         {
             sibling = null;
-            WalkTree(root, builder, attributes, localeCode, diagnostics, offset = 0);
+            WalkTree(root, builder, attributes, localeCode, diagnostics, sharedMarkupsMeta, offset = 0);
         }
 
-        private void WalkTree(MarkupTreeNode root, System.Text.StringBuilder builder, List<MarkupAttribute> attributes, string localeCode, List<MarkupDiagnostic> diagnostics, int offset = 0)
+        private void WalkTree(MarkupTreeNode root, System.Text.StringBuilder builder, List<MarkupAttribute> attributes, string localeCode, List<MarkupDiagnostic> diagnostics, SharedMarkupsMeta sharedMarkupsMeta, int offset = 0)
         {
             // if we are a text node
             if (root is MarkupTextNode)
@@ -832,7 +833,7 @@ namespace Yarn.Markup
             var childAttributes = new List<MarkupAttribute>();
             foreach (var child in root.children)
             {
-                WalkTree(child, childBuilder, childAttributes, localeCode, diagnostics, builder.Length + offset);
+                WalkTree(child, childBuilder, childAttributes, localeCode, diagnostics, sharedMarkupsMeta, builder.Length + offset);
             }
 
             // before we go any further if we are the root node that means we have finished and can just wrap up
@@ -852,7 +853,7 @@ namespace Yarn.Markup
                 // so in this case we need to give the rewriter the combined child string and it's attributes
                 // because it is up to you to fix any attributes if you modify them
                 MarkupAttribute attribute = new MarkupAttribute(builder.Length + offset, root.firstToken?.Start ?? -1, childBuilder.Length, root.name!, root.properties);
-                diagnostics.AddRange(rewriter.ProcessReplacementMarker(attribute, childBuilder, childAttributes, localeCode));
+                diagnostics.AddRange(rewriter.ProcessReplacementMarker(attribute, childBuilder, childAttributes, sharedMarkupsMeta, localeCode));
             }
             else
             {
@@ -1478,6 +1479,8 @@ namespace Yarn.Markup
                 throw new ArgumentNullException(nameof(input));
             }
 
+            var sharedMarkupsMeta = new SharedMarkupsMeta();
+
             input = input.Normalize();
             var tokens = LexMarkup(input);
             var parseResult = BuildMarkupTreeFromTokens(tokens, input);
@@ -1488,7 +1491,8 @@ namespace Yarn.Markup
             {
                 var errorMarkup = new MarkupParseResult(
                     text: input,
-                    attributes: new List<MarkupAttribute>()
+                    attributes: new List<MarkupAttribute>(),
+                    sharedMarkupsMeta: sharedMarkupsMeta
                 );
 
                 return (errorMarkup, parseResult.diagnostics);
@@ -1498,7 +1502,7 @@ namespace Yarn.Markup
             List<MarkupAttribute> attributes = new List<MarkupAttribute>();
             List<MarkupDiagnostic> diagnostics = new List<MarkupDiagnostic>();
 
-            WalkAndProcessTree(parseResult.tree, builder, attributes, localeCode, diagnostics);
+            WalkAndProcessTree(parseResult.tree, builder, attributes, localeCode, diagnostics, sharedMarkupsMeta);
 
             if (squish)
             {
@@ -1550,7 +1554,8 @@ namespace Yarn.Markup
 
             var markup = new MarkupParseResult(
                 text: finalText,
-                attributes: attributes
+                attributes: attributes,
+                sharedMarkupsMeta: sharedMarkupsMeta
             );
 
             return (markup, diagnostics);
@@ -1696,7 +1701,7 @@ namespace Yarn.Markup
         }
 
         /// <inheritdoc/>
-        public List<LineParser.MarkupDiagnostic> ProcessReplacementMarker(MarkupAttribute marker, StringBuilder childBuilder, List<MarkupAttribute> childAttributes, string localeCode)
+        public List<LineParser.MarkupDiagnostic> ProcessReplacementMarker(MarkupAttribute marker, StringBuilder childBuilder, List<MarkupAttribute> childAttributes, SharedMarkupsMeta sharedMarkupsMeta, string localeCode)
         {
             // we have somehow been given an invalid setup, can't continue so early out.
             if (childBuilder == null || childAttributes == null)

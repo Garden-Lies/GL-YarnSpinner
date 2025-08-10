@@ -27,6 +27,8 @@ SOFTWARE.
 namespace Yarn.Markup
 {
     using System.Collections.Generic;
+    using YarnSpinner.YarnSpinner.Markup;
+
     /// <summary>Provides a mechanism for producing replacement text for a
     /// marker.</summary>
     /// <seealso cref="LineParser.RegisterMarkerProcessor"/>
@@ -44,6 +46,7 @@ namespace Yarn.Markup
         /// any text needed from this marker.</param>
         /// <param name="childAttributes">The child attributes of <paramref
         /// name="marker"/>.</param>
+        /// <param name="sharedMarkupsMeta"></param>
         /// <param name="localeCode">A BCP-47 locale code that represents the
         /// locale in which any processing should take place.</param>
         /// <example>
@@ -63,6 +66,6 @@ namespace Yarn.Markup
         /// </example>
         /// <returns>The collection of diagnostics produced during processing,
         /// if any.</returns>
-        public List<LineParser.MarkupDiagnostic> ProcessReplacementMarker(MarkupAttribute marker, System.Text.StringBuilder childBuilder, List<MarkupAttribute> childAttributes, string localeCode);
+        public List<LineParser.MarkupDiagnostic> ProcessReplacementMarker(MarkupAttribute marker, System.Text.StringBuilder childBuilder, List<MarkupAttribute> childAttributes, SharedMarkupsMeta sharedMarkupsMeta, string localeCode);
     }
 }
